@@ -23,7 +23,7 @@ export function getModel(cwd, api) {
         !p.endsWith('.test.js') &&
         !p.endsWith('.test.jsx') &&
         !p.endsWith('.test.ts') &&
-        !p.endsWith('.test.tsx'),
+        !p.endsWith('.test.tsx')
     )
     .map(p => api.winPath(join(cwd, p)));
 }
@@ -52,9 +52,7 @@ function getPageModels(cwd, api) {
 
 function isSrcPath(path, api) {
   const { paths, winPath } = api;
-  return (
-    endWithSlash(winPath(path)) === endWithSlash(winPath(paths.absSrcPath))
-  );
+  return endWithSlash(winPath(path)) === endWithSlash(winPath(paths.absSrcPath));
 }
 
 export function getGlobalModels(api, shouldImportDynamic) {
@@ -101,19 +99,17 @@ export default function(api, opts = {}) {
   }
 
   function getGlobalModelContent() {
-    return exclude(
+    const globalModels = exclude(
       getGlobalModels(api, shouldImportDynamic),
-      optsToArray(opts.exclude),
+      optsToArray(opts.exclude)
     )
       .map(path =>
         `
-    app.model({ namespace: '${basename(
-      path,
-      extname(path),
-    )}', ...(require('${path}').default) });
-  `.trim(),
+    '${basename(path, extname(path))}': require('${path}').default
+  `.trim()
       )
       .join('\r\n');
+    return `{${globalModels}}`;
   }
 
   function getPluginContent() {
@@ -123,26 +119,26 @@ export default function(api, opts = {}) {
     const ret = pluginPaths.map(path =>
       `
 app.use(require('../../${path}').default);
-  `.trim(),
+  `.trim()
     );
     if (opts.immer) {
       ret.push(
         `
 app.use(require('${winPath(require.resolve('dva-immer'))}').default());
-      `.trim(),
+      `.trim()
       );
     }
     return ret.join('\r\n');
   }
 
-  function generateDvaContainer() {
-    const tpl = join(__dirname, '../template/DvaContainer.js');
+  function generateRematchContainer() {
+    const tpl = join(__dirname, '../template/RematchContainer.js');
     const tplContent = readFileSync(tpl, 'utf-8');
-    api.writeTmpFile('DvaContainer.js', tplContent);
+    api.writeTmpFile('RematchContainer.js', tplContent);
   }
 
-  function generateInitDva() {
-    const tpl = join(__dirname, '../template/initDva.js');
+  function generateInitRematch() {
+    const tpl = join(__dirname, '../template/initRematch.js');
     let tplContent = readFileSync(tpl, 'utf-8');
     const dvaJS = getDvaJS();
     if (dvaJS) {
@@ -150,7 +146,7 @@ app.use(require('${winPath(require.resolve('dva-immer'))}').default());
         '<%= ExtendDvaConfig %>',
         `
 ...((require('${dvaJS}').config || (() => ({})))()),
-        `.trim(),
+        `.trim()
       );
     }
     tplContent = tplContent
@@ -158,17 +154,15 @@ app.use(require('${winPath(require.resolve('dva-immer'))}').default());
       .replace('<%= EnhanceApp %>', '')
       .replace('<%= RegisterPlugins %>', getPluginContent())
       .replace('<%= RegisterModels %>', getGlobalModelContent());
-    api.writeTmpFile('initDva.js', tplContent);
+    api.writeTmpFile('initRematch.js', tplContent);
   }
 
   api.onGenerateFiles(() => {
-    generateDvaContainer();
-    generateInitDva();
+    generateRematchContainer();
+    generateInitRematch();
   });
 
-  api.modifyRouterRootComponent(
-    `require('dva/router').routerRedux.ConnectedRouter`,
-  );
+  api.modifyRouterRootComponent(`require('dva/router').routerRedux.ConnectedRouter`);
 
   if (shouldImportDynamic) {
     api.addRouterImport({
@@ -187,7 +181,7 @@ app.use(require('${winPath(require.resolve('dva-immer'))}').default());
       let loadingOpts = '';
       if (opts.dynamicImport.loadingComponent) {
         loadingOpts = `LoadingComponent: require('${winPath(
-          join(paths.absSrcPath, opts.dynamicImport.loadingComponent),
+          join(paths.absSrcPath, opts.dynamicImport.loadingComponent)
         )}').default,`;
       }
 
@@ -218,12 +212,12 @@ models: () => [
             : ''
         }'${model}').then(m => { return { namespace: '${basename(
           model,
-          extname(model),
-        )}',...m.default}})`,
+          extname(model)
+        )}',...m.default}})`
     )
     .join(',\r\n  ')}
 ],
-      `.trim(),
+      `.trim()
         );
       }
       return ret.replace('<%= MODELS %>', '');
@@ -233,7 +227,7 @@ models: () => [
   const dvaDir = compatDirname(
     'dva/package.json',
     cwd,
-    dirname(require.resolve('dva/package.json')),
+    dirname(require.resolve('dva/package.json'))
   );
 
   api.addVersionInfo([
@@ -290,7 +284,7 @@ models: () => [
 
   api.addEntryCodeAhead(
     `
-require('@tmp/initDva');
-  `.trim(),
+require('@tmp/initRematch');
+  `.trim()
   );
 }

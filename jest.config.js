@@ -1,4 +1,4 @@
 // jest.config.js
 module.exports = {
-    testPathIgnorePatterns: ['<rootDir>/src/fixtures/'],
+    testPathIgnorePatterns: ['<rootDir>/src/fixtures/','<rootDir>/demo/'],
 };

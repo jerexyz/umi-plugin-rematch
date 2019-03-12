@@ -1,17 +1,17 @@
 
-export default {
-  state: '<%= name %>',
-  subscriptions: {
-    setup({ dispatch, history }) {
-    },
-  },
+export const '<%= name %>' = {
+  state: {},
   reducers: {
-    update(state) {
-      return `${state}_<%= name %>`;
-    },
+    update(state, payload) {
+      return state + payload
+    }
   },
-  effects: {
-    *fetch({ type, payload }, { put, call, select }) {
-    },
-  },
+  effects: (dispatch) => ({
+    // handle state changes with impure functions.
+    // use async/await for async actions
+    async incrementAsync(payload, rootState) {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      dispatch.count.increment(payload)
+    }
+  })
 }

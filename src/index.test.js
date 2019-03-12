@@ -19,7 +19,7 @@ function normalizeModels(models, base) {
   return models.map(model => model.replace(winPath(base), '$CWD$'));
 }
 
-describe('umi-plugin-dva', () => {
+describe('umi-plugin-rematch', () => {
   it('getModel with model.js', () => {
     const dir = join(base, 'model');
     const models = normalizeModels(getModel(dir, api), dir);

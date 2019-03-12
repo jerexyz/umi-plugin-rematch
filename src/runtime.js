@@ -1,6 +1,6 @@
 import React from 'react';
 
 export function rootContainer(container) {
-  const DvaContainer = require('@tmp/DvaContainer').default;
-  return React.createElement(DvaContainer, null, container);
+  const RematchContainer = require('@tmp/RematchContainer').default;
+  return React.createElement(RematchContainer, null, container);
 }

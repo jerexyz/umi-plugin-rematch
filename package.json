@@ -1,6 +1,6 @@
 {
   "name": "@jerexyz/umi-plugin-rematch",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "./lib/index.js",
   "dependencies": {
     "@rematch/core": "^1.1.0",
@@ -18,9 +18,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jerexyz/umi-plugin-rematch/tree/master/packages/umi-plugin-rematch"
+    "url": "https://github.com/jerexyz/umi-plugin-rematch/tree/master"
   },
-  "homepage": "https://github.com/jerexyz/umi-plugin-rematch/tree/master/packages/umi-plugin-rematch",
+  "homepage": "https://github.com/jerexyz/umi-plugin-rematch/tree/master",
   "authors": [
     "xyzjere <xyzjere@gmail.com> (https://github.com/jerexyz)"
   ],
