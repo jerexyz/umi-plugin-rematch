@@ -103,11 +103,16 @@ export default function(api, opts = {}) {
       getGlobalModels(api, shouldImportDynamic),
       optsToArray(opts.exclude)
     )
-      .map(path =>
-        `
-    '${basename(path, extname(path))}': require('${path}').default
-  `.trim()
-      )
+      .map(path => {
+        let namespace = basename(path, extname(path));
+        if (/model/.test(namespace)) {
+          const [, matchName = ''] = /pages\/(\S+)\/model/g.exec(path);
+          namespace = matchName.replace('/', '.');
+        }
+        return `
+        '${namespace}': require('${path}').default
+      `.trim();
+      })
       .join(',\r\n');
     return `{${globalModels}}`;
   }
@@ -250,9 +255,7 @@ models: () => [
           }
         : {}),
     };
-    const extraBabelPlugins = [
-      ...(memo.extraBabelPlugins || []),
-    ];
+    const extraBabelPlugins = [...(memo.extraBabelPlugins || [])];
     return {
       ...memo,
       alias,
