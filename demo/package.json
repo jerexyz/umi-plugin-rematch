@@ -8,6 +8,8 @@
     "precommit": "lint-staged"
   },
   "dependencies": {
+    "@jerexyz/umi-plugin-rematch": "^0.1.4",
+    "path-to-regexp": "^3.0.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0"
   },

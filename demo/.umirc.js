@@ -20,6 +20,6 @@ export default {
         },
       },
     ],
-    ['umi-plugin-rematch', { immer: true }],
+    ['@jerexyz/umi-plugin-rematch', { immer: true }],
   ],
 };
