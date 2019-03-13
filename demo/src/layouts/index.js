@@ -1,4 +1,7 @@
 import styles from './index.css';
+import withRouter from 'umi/withRouter';
+
+
 
 function BasicLayout(props) {
   return (
@@ -9,4 +12,4 @@ function BasicLayout(props) {
   );
 }
 
-export default BasicLayout;
+export default withRouter(BasicLayout);

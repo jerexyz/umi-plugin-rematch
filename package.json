@@ -4,13 +4,17 @@
   "main": "./lib/index.js",
   "dependencies": {
     "@rematch/core": "^1.1.0",
+    "@rematch/immer": "^1.1.0",
     "@rematch/loading": "^0.5.1",
     "globby": "7.1.1",
     "lodash.uniq": "4.5.0",
     "object-assign": "4.1.1",
     "path-is-root": "0.1.0",
     "path-to-regexp": "1.7.0",
-    "umi-utils": "1.3.1"
+    "react-redux": "^6.0.1",
+    "react-router-redux": "^5.0.0-alpha.9",
+    "umi-utils": "1.3.1",
+    "@rematch/immer": "^1.1.0"
   },
   "scripts": {
     "test": "umi-tools test",

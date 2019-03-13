@@ -72,10 +72,10 @@ export default function(api, opts = {}) {
   const isDev = process.env.NODE_ENV === 'development';
   const shouldImportDynamic = opts.dynamicImport;
 
-  function getDvaJS() {
-    const dvaJS = findJS(paths.absSrcPath, 'dva');
-    if (dvaJS) {
-      return winPath(dvaJS);
+  function getRematchJS() {
+    const RematchJS = findJS(paths.absSrcPath, 'rematch');
+    if (RematchJS) {
+      return winPath(RematchJS);
     }
   }
 
@@ -108,7 +108,7 @@ export default function(api, opts = {}) {
     '${basename(path, extname(path))}': require('${path}').default
   `.trim()
       )
-      .join('\r\n');
+      .join(',\r\n');
     return `{${globalModels}}`;
   }
 
@@ -118,17 +118,17 @@ export default function(api, opts = {}) {
     });
     const ret = pluginPaths.map(path =>
       `
-app.use(require('../../${path}').default);
+        require('../../${path}').default;
   `.trim()
     );
     if (opts.immer) {
       ret.push(
         `
-app.use(require('${winPath(require.resolve('dva-immer'))}').default());
+      new require('${winPath(require.resolve('@rematch/immer'))}').default()
       `.trim()
       );
     }
-    return ret.join('\r\n');
+    return `[${ret.join(',')}]`;
   }
 
   function generateRematchContainer() {
@@ -140,17 +140,17 @@ app.use(require('${winPath(require.resolve('dva-immer'))}').default());
   function generateInitRematch() {
     const tpl = join(__dirname, '../template/initRematch.js');
     let tplContent = readFileSync(tpl, 'utf-8');
-    const dvaJS = getDvaJS();
-    if (dvaJS) {
+    const RematchJS = getRematchJS();
+    if (RematchJS) {
       tplContent = tplContent.replace(
-        '<%= ExtendDvaConfig %>',
+        '<%= ExtendRematchConfig %>',
         `
-...((require('${dvaJS}').config || (() => ({})))()),
+...((require('${RematchJS}').config || (() => ({})))()),
         `.trim()
       );
     }
     tplContent = tplContent
-      .replace('<%= ExtendDvaConfig %>', '')
+      .replace('<%= ExtendRematchConfig %>', '')
       .replace('<%= EnhanceApp %>', '')
       .replace('<%= RegisterPlugins %>', getPluginContent())
       .replace('<%= RegisterModels %>', getGlobalModelContent());
@@ -162,12 +162,12 @@ app.use(require('${winPath(require.resolve('dva-immer'))}').default());
     generateInitRematch();
   });
 
-  api.modifyRouterRootComponent(`require('dva/router').routerRedux.ConnectedRouter`);
+  api.modifyRouterRootComponent(`require('react-router-redux').ConnectedRouter`);
 
   if (shouldImportDynamic) {
     api.addRouterImport({
-      source: 'dva/dynamic',
-      specifier: '_dvaDynamic',
+      source: 'rematch/dynamic',
+      specifier: '_rematchDynamic',
     });
   }
 
@@ -190,7 +190,7 @@ app.use(require('${winPath(require.resolve('dva-immer'))}').default());
         extendStr = `/* webpackChunkName: ^${webpackChunkName}^ */`;
       }
       let ret = `
-_dvaDynamic({
+_rematchDynamic({
   <%= MODELS %>
   component: () => import(${extendStr}'${importPath}'),
   ${loadingOpts}
@@ -215,7 +215,7 @@ models: () => [
           extname(model)
         )}',...m.default}})`
     )
-    .join(',\r\n  ')}
+    .join(',\r\n')}
 ],
       `.trim()
         );
@@ -224,24 +224,24 @@ models: () => [
     });
   }
 
-  const dvaDir = compatDirname(
-    'dva/package.json',
+  const rematchDir = compatDirname(
+    '@rematch/core/package.json',
     cwd,
-    dirname(require.resolve('dva/package.json'))
+    dirname(require.resolve('@rematch/core/package.json'))
   );
 
   api.addVersionInfo([
-    `dva@${require(join(dvaDir, 'package.json')).version} (${dvaDir})`,
-    `dva-loading@${require('dva-loading/package').version}`,
-    `dva-immer@${require('dva-immer/package').version}`,
+    `rematch@${require(join(rematchDir, 'package.json')).version} (${rematchDir})`,
+    `rematch-loading@${require('@rematch/loading/package').version}`,
+    `rematch-immer@${require('@rematch/immer/package').version}`,
     `path-to-regexp@${require('path-to-regexp/package').version}`,
   ]);
 
   api.modifyAFWebpackOpts(memo => {
     const alias = {
       ...memo.alias,
-      dva: dvaDir,
-      'dva-loading': require.resolve('dva-loading'),
+      rematch: rematchDir,
+      'rematch-loading': require.resolve('@rematch/loading'),
       'path-to-regexp': require.resolve('path-to-regexp'),
       'object-assign': require.resolve('object-assign'),
       ...(opts.immer
@@ -252,7 +252,6 @@ models: () => [
     };
     const extraBabelPlugins = [
       ...(memo.extraBabelPlugins || []),
-      ...(isDev && opts.hmr ? [require.resolve('babel-plugin-dva-hmr')] : []),
     ];
     return {
       ...memo,
@@ -268,19 +267,19 @@ models: () => [
     join(paths.absSrcPath, 'model.jsx'),
     join(paths.absSrcPath, 'model.ts'),
     join(paths.absSrcPath, 'model.tsx'),
-    join(paths.absSrcPath, 'dva.js'),
-    join(paths.absSrcPath, 'dva.jsx'),
-    join(paths.absSrcPath, 'dva.ts'),
-    join(paths.absSrcPath, 'dva.tsx'),
+    join(paths.absSrcPath, 'rematch.js'),
+    join(paths.absSrcPath, 'rematch.jsx'),
+    join(paths.absSrcPath, 'rematch.ts'),
+    join(paths.absSrcPath, 'rematch.tsx'),
   ]);
 
-  api.registerGenerator('dva:model', {
+  api.registerGenerator('rematch:model', {
     Generator: require('./model').default(api),
     resolved: join(__dirname, './model'),
   });
 
   api.addRuntimePlugin(join(__dirname, './runtime'));
-  api.addRuntimePluginKey('dva');
+  api.addRuntimePluginKey('rematch');
 
   api.addEntryCodeAhead(
     `
