@@ -237,9 +237,9 @@ models: () => [
 
   api.addVersionInfo([
     `rematch@${require(join(rematchDir, 'package.json')).version} (${rematchDir})`,
-    `rematch-loading@${require('@rematch/loading/package').version}`,
-    `rematch-immer@${require('@rematch/immer/package').version}`,
-    `path-to-regexp@${require('path-to-regexp/package').version}`,
+    `rematch-loading@${require('@rematch/loading/package.json').version}`,
+    `rematch-immer@${require('@rematch/immer/package.json').version}`,
+    `path-to-regexp@${require('path-to-regexp/package.json').version}`,
   ]);
 
   api.modifyAFWebpackOpts(memo => {
